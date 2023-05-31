@@ -4,24 +4,74 @@
 # Description:  A simple client to update DNS record from a remote client to a DNS server using nsupdate protocol, like No-IP or DynDNS for your own domain names.
  
 PN=`basename $0`
-ARGS=`getopt --name "$PN" --long help:,record:,dest:,type:,life: --options hr:d:t:k:l:v -- "$@"`
-if [ $? -ne 0 ]; then
-  exit 1
-fi
-eval set -- $ARGS
-
-while [ $# -gt 0 ]; do
-    case "$1" in
-        -h | --help)     HELP=yes;;
-        -r | --record)   REC="$2"; shift;;
-        -d | --dest)     DEST="$2"; shift;;
-        -t | --type)     TYPE="$2"; shift;;
-        -l | --life)     LIFE="$2"; shift;;
-        -k | --key)      KEY="$2"; shift;;
-        -v | --verbose)  VERBOSE=yes;;
-        --)              shift; break;;
-    esac
-    shift
+while (( "$#" )); do
+  case "$1" in
+    -h|--help)
+      HELP=yes
+      shift
+      ;;
+    -r|--record)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        REC=$2
+        shift 2
+      else
+        echo "Error: Argument for $1 is missing" >&2
+        exit 1
+      fi
+      ;;
+    -d|--dest)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        DEST=$2
+        shift 2
+      else
+        echo "Error: Argument for $1 is missing" >&2
+        exit 1
+      fi
+      ;;
+    -t|--type)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        TYPE=$2
+        shift 2
+      else
+        echo "Error: Argument for $1 is missing" >&2
+        exit 1
+      fi
+      ;;
+    -l|--life)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        LIFE=$2
+        shift 2
+      else
+        echo "Error: Argument for $1 is missing" >&2
+        exit 1
+      fi
+      ;;
+    -k|--key)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        KEY=$2
+        shift 2
+      else
+        echo "Error: Argument for $1 is missing" >&2
+        exit 1
+      fi
+      ;;
+    -v|--verbose)
+      VERBOSE=yes
+      shift
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*|--*=)
+      echo "Error: Unsupported flag $1" >&2
+      exit 1
+      ;;
+    *)
+      PARAMS="$PARAMS $1"
+      shift
+      ;;
+  esac
 done
 
 usage=$( cat <<EOF
